@@ -351,7 +351,7 @@ function DashboardPage() {
       <section className="grid-2">
         <div className="panel">
           <div className="panel__header">
-            <h3><span className="panel__title-icon" aria-hidden="true">⌁</span>Aktivitaeten</h3>
+            <h3>Aktivitaeten</h3>
           </div>
           <div className="panel__empty">
             <div className="panel__empty-icon">
@@ -360,13 +360,13 @@ function DashboardPage() {
             <p>Keine aktuellen Aktivitaeten</p>
           </div>
           <div className="panel__footer-actions">
-            <button className="btn btn--ghost">Alle Pruefungen ↗</button>
+            <NavLink className="btn btn--ghost" to="/aufgaben-pruefung">Alle Pruefungen ↗</NavLink>
           </div>
         </div>
 
         <div className="panel">
           <div className="panel__header">
-            <h3><span className="panel__title-icon" aria-hidden="true">◉</span>Neueste Bewerbungen</h3>
+            <h3>Neueste Bewerbungen</h3>
             <span className="badge badge--warning">Ausstehend • 25.01.2026</span>
           </div>
           <div className="applications">
@@ -386,7 +386,7 @@ function DashboardPage() {
 
       <section className="panel panel--wide">
         <div className="panel__header">
-          <h3><span className="panel__title-icon panel__title-icon--pink" aria-hidden="true">◌</span>Sub-Admin Verwaltung</h3>
+          <h3>Sub-Admin Verwaltung</h3>
           <button className="btn btn--dark">Sub-Admins verwalten</button>
         </div>
         <p>Erstellen und verwalten Sie Sub-Admins mit eingeschraenkten Berechtigungen.</p>
@@ -394,7 +394,7 @@ function DashboardPage() {
 
       <section className="panel panel--wide">
         <div className="panel__header">
-          <h3><span className="panel__title-icon panel__title-icon--amber" aria-hidden="true">◍</span>Caller Leaderboard <span className="muted">(Monat)</span></h3>
+          <h3>Caller Leaderboard <span className="muted">(Monat)</span></h3>
           <button className="btn btn--ghost">Alle anzeigen ↗</button>
         </div>
         <div className="panel__empty">
@@ -3141,7 +3141,7 @@ function App() {
       />
       <aside className="sidebar">
         <div className="sidebar__brand">
-          <span>JJPanel</span>
+          <span>Ultimate Panel</span>
         </div>
         <nav
           className="sidebar__nav"

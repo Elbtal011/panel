@@ -207,6 +207,16 @@
   cursor: pointer;
   box-shadow: none;
   border: 1px solid #e2e8f0;
+  text-decoration: none;
+  -webkit-text-decoration: none;
+}
+
+.btn:link,
+.btn:visited,
+.btn:hover,
+.btn:active {
+  text-decoration: none;
+  -webkit-text-decoration: none;
 }
 
 .btn--ghost {
@@ -440,6 +450,8 @@
   padding: 2px 8px;
   font-size: 12px;
   border-radius: 8px;
+  text-decoration: none;
+  -webkit-text-decoration: none;
 }
 
 .status-pill--success {
@@ -1426,20 +1438,30 @@
   background: var(--ui-surface);
   color: var(--ui-text);
   font-weight: 600;
+  font-size: 14px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
   white-space: nowrap;
+  text-decoration: none;
+  -webkit-text-decoration: none;
+  cursor: pointer;
 }
 
 .btn:hover {
   background: var(--ui-surface-soft);
 }
 
+.btn:focus-visible {
+  outline: 2px solid #93c5fd;
+  outline-offset: 1px;
+}
+
 .btn--ghost {
   background: var(--ui-surface);
   color: var(--ui-text);
+  border-color: var(--ui-border-strong);
 }
 
 .btn--dark {
