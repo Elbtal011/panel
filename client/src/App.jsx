@@ -1238,7 +1238,7 @@ const initialPhoneNumbers = [
     provider: 'sms_receive_net',
     status: 'Aktiv',
     service: 'sms_receive_net',
-    country: 'germany',
+    country: 'Germany',
     expiresIn: '2 months ago',
     assignedTo: 'Nicht zugewiesen',
     badgeTone: 'purple',
@@ -1251,6 +1251,12 @@ function generatePhoneNumber(countryCode) {
     return `+7${digits}`
   }
   return `+49${digits}`
+}
+
+function formatCountry(value) {
+  if (!value) return value
+  const text = String(value).trim().toLowerCase()
+  return text.charAt(0).toUpperCase() + text.slice(1)
 }
 
 function TelefonnummernPage() {
@@ -1323,7 +1329,7 @@ function TelefonnummernPage() {
 
   function handleManualSubmit(event) {
     event.preventDefault()
-    let hostname = 'Manual Source'
+    let hostname = 'Manuelle Quelle'
     try {
       hostname = new URL(manualUrl).hostname
     } catch {
@@ -1373,7 +1379,7 @@ function TelefonnummernPage() {
           <button className="btn btn--ghost" type="button">Aktualisieren</button>
           <button className="btn btn--dark" type="button" onClick={() => setIsAnosimOpen(true)}>+ de Anosim</button>
           <button className="btn btn--dark" type="button" onClick={() => setIsSmspvaOpen(true)}>+ ru SMSPVA</button>
-          <button className="btn btn--ghost" type="button" onClick={() => setIsManualOpen(true)}>Manual URL</button>
+          <button className="btn btn--ghost" type="button" onClick={() => setIsManualOpen(true)}>Manuelle URL</button>
         </div>
       </section>
 
@@ -1388,11 +1394,11 @@ function TelefonnummernPage() {
                   <span className="phone-badge phone-badge--green">{item.status}</span>
                 </div>
               </header>
-              <p className="phone-card__service">Service {item.service}</p>
+              <p className="phone-card__service">Dienst {item.service}</p>
               <div className="phone-card__meta">
                 <div>
                   <span>Land</span>
-                  <strong>{item.country}</strong>
+                  <strong>{formatCountry(item.country)}</strong>
                 </div>
                 <div>
                   <span>Laeuft ab</span>
@@ -1493,9 +1499,9 @@ function TelefonnummernPage() {
               <button className="btn btn--ghost modal__close" type="button" onClick={() => setIsSmspvaOpen(false)}>×</button>
             </header>
             <form className="modal__body phone-modal__body" onSubmit={handleSmspvaSubmit}>
-              <div className="phone-provider-note">SMSPVA - Zuverlaessiger Service fuer osteuropaeische Telefonnummern</div>
+              <div className="phone-provider-note">SMSPVA - Zuverlaessiger Dienst fuer osteuropaeische Telefonnummern</div>
               <label className="phone-field">
-                <span>Service</span>
+                <span>Dienst</span>
                 <select value={smspvaService} onChange={(event) => setSmspvaService(event.target.value)}>
                   <option>1xbet - ~$1.5</option>
                   <option>Telegram - ~$0.8</option>
@@ -1531,27 +1537,28 @@ function TelefonnummernPage() {
         <div className="modal-backdrop" onClick={() => setIsManualOpen(false)}>
           <section className="modal phone-modal phone-modal--compact" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
             <header className="modal__header">
-              <h3>Add Manual Phone Number</h3>
+              <h3>Manuelle Telefonnummer hinzufuegen</h3>
               <button className="btn btn--ghost modal__close" type="button" onClick={() => setIsManualOpen(false)}>×</button>
             </header>
             <form className="modal__body phone-modal__body" onSubmit={handleManualSubmit}>
               <p className="phone-manual-text">
-                Add a phone number from receive-sms-online.info, sms-receive.net, or Anosim share URL.
-                This will allow you to receive SMS messages through web scraping or API.
+                Fuegen Sie eine Telefonnummer von receive-sms-online.info, sms-receive.net
+                oder einer Anosim-Freigabe-URL hinzu.
+                Dadurch koennen SMS-Nachrichten per Web-Scraping oder API empfangen werden.
               </p>
               <label className="phone-field">
-                <span>Manual SMS Provider URL</span>
+                <span>Manuelle SMS-Provider-URL</span>
                 <input
                   type="url"
-                  placeholder="Enter URL from sms-receive.net, receive-sms-online.info, or anosim"
+                  placeholder="URL von sms-receive.net, receive-sms-online.info oder anosim eingeben"
                   value={manualUrl}
                   onChange={(event) => setManualUrl(event.target.value)}
                   required
                 />
               </label>
               <div className="modal__actions">
-                <button className="btn btn--danger" type="button" onClick={() => setIsManualOpen(false)}>Cancel</button>
-                <button className="btn btn--dark" type="submit" disabled={!manualUrl.trim()}>Add Phone Number</button>
+                <button className="btn btn--danger" type="button" onClick={() => setIsManualOpen(false)}>Abbrechen</button>
+                <button className="btn btn--dark" type="submit" disabled={!manualUrl.trim()}>Telefonnummer hinzufuegen</button>
               </div>
             </form>
           </section>
@@ -2134,7 +2141,7 @@ function MitarbeiterPage({ employees, onAddEmployee }) {
       <section className="panel panel--wide">
         <div className="tabs">
           <button className="tab tab--active">Alle Mitarbeiter <span className="tab__count">{employees.length}</span></button>
-          <button className="tab">Starter Tasks Offen</button>
+          <button className="tab">Starter-Aufgaben offen</button>
         </div>
 
         <div className="employees-header">
@@ -2190,39 +2197,39 @@ function MitarbeiterPage({ employees, onAddEmployee }) {
         <div className="modal-backdrop" onClick={closeAddModal}>
           <section className="modal" onClick={(event) => event.stopPropagation()}>
             <div className="modal__header">
-              <h3>Add new employee</h3>
+              <h3>Neuen Mitarbeiter hinzufuegen</h3>
               <button className="btn btn--ghost modal__close" onClick={closeAddModal}>×</button>
             </div>
             <form className="modal__body" onSubmit={handleAddSubmit}>
               <div className="modal__grid">
                 <label className="field">
-                  <span>First name</span>
+                  <span>Vorname</span>
                   <input name="firstName" value={formData.firstName} onChange={handleFormChange} placeholder="Max" required />
                 </label>
                 <label className="field">
-                  <span>Last name</span>
+                  <span>Nachname</span>
                   <input name="lastName" value={formData.lastName} onChange={handleFormChange} placeholder="Mustermann" required />
                 </label>
               </div>
               <label className="field">
-                <span>e-mail</span>
+                <span>E-Mail</span>
                 <input type="email" name="email" value={formData.email} onChange={handleFormChange} placeholder="max.mustermann@example.com" required />
               </label>
               <label className="field">
-                <span>Phone number (optional)</span>
+                <span>Telefonnummer (optional)</span>
                 <input name="phone" value={formData.phone} onChange={handleFormChange} placeholder="+49 123 456789" />
               </label>
               <label className="field">
-                <span>position</span>
-                <input name="position" value={formData.position} onChange={handleFormChange} placeholder="e.g. developers, designers, etc." />
+                <span>Position</span>
+                <input name="position" value={formData.position} onChange={handleFormChange} placeholder="z.B. Entwickler, Designer usw." />
               </label>
               <label className="field">
-                <span>password</span>
-                <input type="password" name="password" value={formData.password} onChange={handleFormChange} placeholder="At least 6 characters" minLength={6} required />
+                <span>Passwort</span>
+                <input type="password" name="password" value={formData.password} onChange={handleFormChange} placeholder="Mindestens 6 Zeichen" minLength={6} required />
               </label>
               <div className="modal__actions">
-                <button type="button" className="btn btn--ghost" onClick={closeAddModal}>Cancel</button>
-                <button type="submit" className="btn btn--dark">Employees create</button>
+                <button type="button" className="btn btn--ghost" onClick={closeAddModal}>Abbrechen</button>
+                <button type="submit" className="btn btn--dark">Mitarbeiter erstellen</button>
               </div>
             </form>
           </section>
@@ -2251,7 +2258,7 @@ function MitarbeiterDetailsPage({ employees }) {
         <div className="employee-details__head">
           <div className="employee-details__title">
             <NavLink className="btn btn--ghost employee-back" to="/mitarbeiter">
-              Back
+              Zurueck
             </NavLink>
             <div>
               <h1>{employee.name}</h1>
@@ -2259,11 +2266,11 @@ function MitarbeiterDetailsPage({ employees }) {
             </div>
           </div>
           <div className="employee-details__actions">
-            <button className="btn btn--success employee-action">Call</button>
-            <button className="btn btn--ghost employee-action">Export</button>
-            <NavLink className="btn btn--dark employee-action" to={`/mitarbeiter/${employee.id}/bearbeiten`}>Edit</NavLink>
-            <button className="btn btn--ghost employee-action">Deactivate</button>
-            <button className="btn btn--danger employee-action">Delete</button>
+            <button className="btn btn--success employee-action">Anrufen</button>
+            <button className="btn btn--ghost employee-action">Exportieren</button>
+            <NavLink className="btn btn--dark employee-action" to={`/mitarbeiter/${employee.id}/bearbeiten`}>Bearbeiten</NavLink>
+            <button className="btn btn--ghost employee-action">Deaktivieren</button>
+            <button className="btn btn--danger employee-action">Loeschen</button>
           </div>
         </div>
 
@@ -2272,31 +2279,31 @@ function MitarbeiterDetailsPage({ employees }) {
             className={`tab employee-tab ${activeTab === 'overview' ? 'tab--active' : ''}`}
             onClick={() => setActiveTab('overview')}
           >
-            Overview
+            Uebersicht
           </button>
           <button
             className={`tab employee-tab ${activeTab === 'tasks' ? 'tab--active' : ''}`}
             onClick={() => setActiveTab('tasks')}
           >
-            Tasks
+            Aufgaben
           </button>
           <button
             className={`tab employee-tab ${activeTab === 'contracts' ? 'tab--active' : ''}`}
             onClick={() => setActiveTab('contracts')}
           >
-            Contracts
+            Vertraege
           </button>
           <button
             className={`tab employee-tab ${activeTab === 'kyc' ? 'tab--active' : ''}`}
             onClick={() => setActiveTab('kyc')}
           >
-            KYC documents
+            KYC-Dokumente
           </button>
           <button
             className={`tab employee-tab ${activeTab === 'phones' ? 'tab--active' : ''}`}
             onClick={() => setActiveTab('phones')}
           >
-            Telephone numbers
+            Telefonnummern
           </button>
         </div>
 
@@ -2304,15 +2311,15 @@ function MitarbeiterDetailsPage({ employees }) {
           <div className="avatar avatar--soft">{employee.name.slice(0, 1).toUpperCase()}</div>
           <div className="employee-details__meta">
             <div className="table__title">{employee.name}</div>
-            <div className="table__subtitle">{employee.email} - {employee.role} - Registered {employee.registeredAt}</div>
+            <div className="table__subtitle">{employee.email} - {employee.role} - Registriert {employee.registeredAt}</div>
           </div>
           <div className="employee-details__badges">
             <span className="status-pill status-pill--success">{employee.status}</span>
-            <span className="status-pill">Pending</span>
+            <span className="status-pill">Ausstehend</span>
           </div>
           <div className="employee-details__tags">
             <p className="details-field__label">Tags</p>
-            <div className="tags">No tags <button className="btn btn--ghost btn--tiny btn--tag-add">+ tag</button></div>
+            <div className="tags">Keine Tags <button className="btn btn--ghost btn--tiny btn--tag-add">+ Tag</button></div>
           </div>
         </div>
       </section>
@@ -2321,7 +2328,7 @@ function MitarbeiterDetailsPage({ employees }) {
       <section className="employee-details__layout">
         <div className="employee-details__left">
           <div className="panel">
-            <h3>Personal data</h3>
+            <h3>Persoenliche Daten</h3>
             <div className="info-grid">
               <div className="info-row">
                 <span className="info-icon" aria-hidden="true">
@@ -2331,7 +2338,7 @@ function MitarbeiterDetailsPage({ employees }) {
                   </svg>
                 </span>
                 <div>
-                  <p className="info-label">First name</p>
+                  <p className="info-label">Vorname</p>
                   <p className="info-value">{employee.name}</p>
                 </div>
               </div>
@@ -2343,7 +2350,7 @@ function MitarbeiterDetailsPage({ employees }) {
                   </svg>
                 </span>
                 <div>
-                  <p className="info-label">Last name</p>
+                  <p className="info-label">Nachname</p>
                   <p className="info-value">Not specified</p>
                 </div>
               </div>
@@ -2398,7 +2405,7 @@ function MitarbeiterDetailsPage({ employees }) {
           </div>
 
           <div className="panel">
-            <h3>Address</h3>
+            <h3>Adresse</h3>
             <div className="info-grid info-grid--compact">
               <div className="info-row">
                 <span className="info-icon" aria-hidden="true">
@@ -2523,7 +2530,7 @@ function MitarbeiterDetailsPage({ employees }) {
           <div className="employee-details__right">
           <div className="panel">
             <h3>Access data</h3>
-            <p className="employee-card-subtitle">Employee login information</p>
+            <p className="employee-card-subtitle">Mitarbeiter-Logininformationen</p>
             <div className="employee-credentials">
               <div>
                 <p className="details-field__label">e-mail address</p>
@@ -2533,21 +2540,21 @@ function MitarbeiterDetailsPage({ employees }) {
                 </div>
               </div>
               <div>
-                <p className="details-field__label">password</p>
+                <p className="details-field__label">Passwort</p>
                 <div className="input-row">
                   <input type="text" value="Not saved" readOnly />
                 </div>
               </div>
-              <button className="btn btn--ghost">Generate new password</button>
+              <button className="btn btn--ghost">Neues Passwort generieren</button>
             </div>
           </div>
 
           <div className="panel">
             <h3>Admin notes</h3>
-            <p className="employee-card-subtitle">Visible only to administrators</p>
+            <p className="employee-card-subtitle">Nur fuer Administratoren sichtbar</p>
             <div className="employee-notes">
-              <div className="employee-notes__empty">No notes available.</div>
-              <button className="btn btn--ghost">Edit</button>
+              <div className="employee-notes__empty">Keine Notizen vorhanden.</div>
+              <button className="btn btn--ghost">Bearbeiten</button>
             </div>
           </div>
           </div>
@@ -2558,33 +2565,33 @@ function MitarbeiterDetailsPage({ employees }) {
         <section className="panel panel--wide employee-section">
           <div className="employee-section__header">
             <div>
-              <h3>Tasks</h3>
-              <p>Assigned tasks for {employee.name}</p>
+              <h3>Aufgaben</h3>
+              <p>Zugewiesene Aufgaben fuer {employee.name}</p>
             </div>
-            <button className="btn btn--ghost">Refresh</button>
+            <button className="btn btn--ghost">Aktualisieren</button>
           </div>
           <div className="employee-stats">
             <div className="applications-stat">
-              <p className="applications-stat__label">Total</p>
+              <p className="applications-stat__label">Gesamt</p>
               <p className="applications-stat__value">0</p>
             </div>
             <div className="applications-stat">
-              <p className="applications-stat__label">Pending</p>
+              <p className="applications-stat__label">Ausstehend</p>
               <p className="applications-stat__value">0</p>
             </div>
             <div className="applications-stat">
-              <p className="applications-stat__label">Completed</p>
+              <p className="applications-stat__label">Abgeschlossen</p>
               <p className="applications-stat__value">0</p>
             </div>
             <div className="applications-stat">
-              <p className="applications-stat__label">Hours</p>
+              <p className="applications-stat__label">Stunden</p>
               <p className="applications-stat__value">0h</p>
             </div>
           </div>
           <div className="employee-empty">
             <div className="employee-empty__icon">[]</div>
-            <h4>No tasks found</h4>
-            <p>No tasks have been assigned to this employee yet.</p>
+            <h4>Keine Aufgaben gefunden</h4>
+            <p>Noch keine Aufgaben zugewiesen.</p>
           </div>
         </section>
       ) : null}
@@ -2593,28 +2600,28 @@ function MitarbeiterDetailsPage({ employees }) {
         <section className="panel panel--wide employee-section">
           <div className="employee-section__header">
             <div>
-              <h3>Contracts</h3>
-              <p>0 contracts assigned</p>
+              <h3>Vertraege</h3>
+              <p>0 Vertraege zugewiesen</p>
             </div>
           </div>
           <div className="employee-contracts">
             <div className="applications-stat">
-              <p className="applications-stat__label">Signed</p>
+              <p className="applications-stat__label">Unterzeichnet</p>
               <p className="applications-stat__value">0</p>
             </div>
             <div className="applications-stat">
-              <p className="applications-stat__label">Pending</p>
+              <p className="applications-stat__label">Ausstehend</p>
               <p className="applications-stat__value">0</p>
             </div>
             <div className="applications-stat">
-              <p className="applications-stat__label">Rejected</p>
+              <p className="applications-stat__label">Abgelehnt</p>
               <p className="applications-stat__value">0</p>
             </div>
           </div>
           <div className="employee-empty">
             <div className="employee-empty__icon">[]</div>
-            <h4>No contracts</h4>
-            <p>No contracts have been assigned to this employee yet.</p>
+            <h4>Keine Vertraege</h4>
+            <p>Noch keine Vertraege zugewiesen.</p>
           </div>
         </section>
       ) : null}
@@ -2623,39 +2630,39 @@ function MitarbeiterDetailsPage({ employees }) {
         <section className="panel panel--wide employee-section">
           <div className="employee-section__header">
             <div>
-              <h3>KYC verification</h3>
+              <h3>KYC-Pruefung</h3>
             </div>
-            <span className="status-pill">Pending</span>
+            <span className="status-pill">Ausstehend</span>
           </div>
           <div className="employee-kyc">
             <div className="employee-kyc__status">
-              <p>Status: Pending</p>
-              <span>No documents submitted yet</span>
+              <p>Status: Ausstehend</p>
+              <span>Noch keine Dokumente eingereicht</span>
               <div className="employee-kyc__actions">
-                <button className="btn btn--ghost">Approve</button>
-                <button className="btn btn--danger">Reject</button>
+                <button className="btn btn--ghost">Genehmigen</button>
+                <button className="btn btn--danger">Ablehnen</button>
               </div>
             </div>
             <div className="employee-kyc__docs">
-              <h4>Uploaded documents (2)</h4>
+              <h4>Hochgeladene Dokumente (2)</h4>
               <div className="employee-kyc__doc">
                 <div>
-                  <strong>Proof of address</strong>
+                  <strong>Adressnachweis</strong>
                   <p>Screenshot_20250609-124904.png - 0.14 MB</p>
                 </div>
                 <div className="employee-kyc__doc-actions">
-                  <button className="btn btn--ghost">View</button>
-                  <button className="btn btn--ghost">Download</button>
+                  <button className="btn btn--ghost">Ansehen</button>
+                  <button className="btn btn--ghost">Herunterladen</button>
                 </div>
               </div>
               <div className="employee-kyc__doc">
                 <div>
-                  <strong>Passport</strong>
+                  <strong>Reisepass</strong>
                   <p>Screenshot_20250609-124834.png - 0.22 MB</p>
                 </div>
                 <div className="employee-kyc__doc-actions">
-                  <button className="btn btn--ghost">View</button>
-                  <button className="btn btn--ghost">Download</button>
+                  <button className="btn btn--ghost">Ansehen</button>
+                  <button className="btn btn--ghost">Herunterladen</button>
                 </div>
               </div>
             </div>
@@ -2667,19 +2674,19 @@ function MitarbeiterDetailsPage({ employees }) {
         <section className="panel panel--wide employee-section">
           <div className="employee-section__header">
             <div>
-              <h3>Telephone numbers</h3>
-              <p>Assigned numbers</p>
+              <h3>Telefonnummern</h3>
+              <p>Zugewiesene Nummern</p>
             </div>
             <div className="employee-section__actions">
-              <button className="btn btn--ghost">Refresh</button>
-              <button className="btn btn--ghost">All numbers</button>
+              <button className="btn btn--ghost">Aktualisieren</button>
+              <button className="btn btn--ghost">Alle Nummern</button>
             </div>
           </div>
           <div className="employee-empty">
             <div className="employee-empty__icon">[]</div>
-            <h4>No numbers assigned</h4>
-            <p>No telephone numbers have been assigned to this employee yet.</p>
-            <button className="btn btn--ghost">Assign number</button>
+            <h4>Keine Nummern zugewiesen</h4>
+            <p>Noch keine Telefonnummern zugewiesen.</p>
+            <button className="btn btn--ghost">Nummer zuweisen</button>
           </div>
         </section>
       ) : null}
