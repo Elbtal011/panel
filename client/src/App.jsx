@@ -1,5 +1,5 @@
 ﻿import { useEffect, useState } from 'react'
-import { NavLink, Route, Routes, useParams } from 'react-router-dom'
+import { NavLink, Route, Routes, useLocation, useParams } from 'react-router-dom'
 import './App.css'
 
 const dashboardStats = [
@@ -2273,19 +2273,38 @@ function SidebarIcon({ name }) {
 
 function App() {
   const [employees, setEmployees] = useState(initialEmployees)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const location = useLocation()
 
   function handleAddEmployee(employee) {
     setEmployees((prev) => [employee, ...prev])
   }
 
+  useEffect(() => {
+    setIsMobileMenuOpen(false)
+  }, [location.pathname])
+
   return (
-    <div className="app">
+    <div className={`app ${isMobileMenuOpen ? 'app--menu-open' : ''}`}>
+      <button
+        className="sidebar-backdrop"
+        type="button"
+        aria-label="Menue schliessen"
+        onClick={() => setIsMobileMenuOpen(false)}
+      />
       <aside className="sidebar">
         <div className="sidebar__brand">
           <div className="brand-dot">M</div>
           <span>MagicVics</span>
         </div>
-        <nav className="sidebar__nav">
+        <nav
+          className="sidebar__nav"
+          onClick={(event) => {
+            if (event.target.closest('.sidebar__link')) {
+              setIsMobileMenuOpen(false)
+            }
+          }}
+        >
           <p className="sidebar__label">Uebersicht</p>
           <NavLink className="sidebar__link" to="/" end>
             <SidebarIcon name="dashboard" />
@@ -2375,6 +2394,15 @@ function App() {
 
       <main className="content">
         <header className="topbar">
+          <button
+            className="icon-btn mobile-menu-btn"
+            type="button"
+            aria-label="Menue oeffnen"
+            aria-expanded={isMobileMenuOpen}
+            onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+          >
+            ☰
+          </button>
           <div className="search">
             <input
               type="text"

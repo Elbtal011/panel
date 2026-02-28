@@ -1242,24 +1242,76 @@
   color: #3730a3;
 }
 
+.mobile-menu-btn,
+.sidebar-backdrop {
+  display: none;
+}
+
 @media (max-width: 980px) {
   .app {
     grid-template-columns: 1fr;
   }
 
+  .mobile-menu-btn {
+    display: inline-flex;
+    flex: 0 0 auto;
+  }
+
+  .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(2, 6, 23, 0.45);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 1190;
+    border: 0;
+    padding: 0;
+  }
+
+  .app--menu-open .sidebar-backdrop {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
   .sidebar {
-    position: sticky;
+    position: fixed;
     top: 0;
-    z-index: 10;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: space-between;
+    left: 0;
+    bottom: 0;
+    width: min(82vw, 320px);
+    z-index: 1200;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    gap: 16px;
+    overflow-y: auto;
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+  }
+
+  .app--menu-open .sidebar {
+    transform: translateX(0);
   }
 
   .sidebar__nav {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    gap: 6px;
+  }
+
+  .sidebar__link {
+    width: 100%;
+  }
+
+  .topbar {
+    align-items: center;
     flex-direction: row;
-    flex-wrap: wrap;
-    gap: 8px;
+  }
+
+  .topbar .search {
+    width: 100%;
   }
 }
 
@@ -1707,13 +1759,14 @@
   }
 
   .topbar {
-    align-items: flex-start;
-    flex-direction: column;
+    align-items: center;
+    flex-direction: row;
+    flex-wrap: wrap;
   }
 
   .topbar .search {
     max-width: none;
-    width: 100%;
+    width: min(100%, 520px);
   }
 
   .page-header {
@@ -3542,5 +3595,49 @@
 
   .kyc-item__actions {
     width: 100%;
+  }
+}
+
+@media (max-width: 720px) {
+  .btn {
+    max-width: 100%;
+    white-space: normal;
+  }
+
+  .status-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .status-banner .btn {
+    align-self: flex-start;
+  }
+
+  .page--dashboard .panel__header {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .page--dashboard .panel__header h3 {
+    min-width: 0;
+  }
+
+  .page--dashboard .panel__footer-actions {
+    justify-content: flex-start;
+  }
+
+  .applications__row {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .applications__info {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .panel__subtitle {
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
 }
