@@ -1,5 +1,5 @@
 ﻿import { useEffect, useState } from 'react'
-import { NavLink, Route, Routes, useLocation, useParams } from 'react-router-dom'
+import { NavLink, Route, Routes, useParams } from 'react-router-dom'
 import './App.css'
 
 const dashboardStats = [
@@ -498,12 +498,11 @@ function BewerbungenPage() {
 }
 
 function KycPruefungPage() {
-  const [requests, setRequests] = useState(kycRequests)
+  const [requests] = useState(kycRequests)
   const [activeTab, setActiveTab] = useState('all')
   const [isLoading, setIsLoading] = useState(true)
   const [selectedRequest, setSelectedRequest] = useState(null)
   useEffect(() => {
-    setIsLoading(true)
     const timer = setTimeout(() => setIsLoading(false), 500)
     return () => clearTimeout(timer)
   }, [activeTab])
@@ -541,7 +540,12 @@ function KycPruefungPage() {
                 key={tab.id}
                 className={`kyc-tab ${isActive ? 'kyc-tab--active' : ''}`}
                 type="button"
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => {
+                  if (tab.id !== activeTab) {
+                    setIsLoading(true)
+                  }
+                  setActiveTab(tab.id)
+                }}
               >
                 {tab.label}
                 <span className="kyc-tab__count">{countForTab(tab.id)}</span>
@@ -1071,7 +1075,6 @@ function StellenanzeigenPage() {
           <span>Aktionen</span>
         </div>
         <div className="job-table__empty">
-          <span className="job-table__empty-icon" aria-hidden="true">▣</span>
           <h3>Keine Stellenanzeigen gefunden</h3>
           <p>Erstellen Sie Ihre erste Stellenanzeige</p>
         </div>
@@ -1214,6 +1217,848 @@ function PlaceholderPage({ title }) {
       </div>
       <p className="muted">Diese Seite ist noch in Arbeit.</p>
     </section>
+  )
+}
+
+const initialPhoneNumbers = [
+  {
+    id: 'de-anosim-1',
+    phone: '+4917614590832',
+    provider: 'Anosim',
+    status: 'Aktiv',
+    service: 'Tinder',
+    country: 'Germany',
+    expiresIn: 'in 30 days',
+    assignedTo: 'Nicht zugewiesen',
+    badgeTone: 'orange',
+  },
+  {
+    id: 'ru-smspva-1',
+    phone: '+4915778640686',
+    provider: 'sms_receive_net',
+    status: 'Aktiv',
+    service: 'sms_receive_net',
+    country: 'germany',
+    expiresIn: '2 months ago',
+    assignedTo: 'Nicht zugewiesen',
+    badgeTone: 'purple',
+  },
+]
+
+function generatePhoneNumber(countryCode) {
+  const digits = Array.from({ length: 10 }, () => Math.floor(Math.random() * 10)).join('')
+  if (countryCode === 'ru') {
+    return `+7${digits}`
+  }
+  return `+49${digits}`
+}
+
+function TelefonnummernPage() {
+  const storageKey = 'crm_phone_numbers'
+  const [phoneNumbers, setPhoneNumbers] = useState(() => {
+    try {
+      const stored = localStorage.getItem(storageKey)
+      if (!stored) return initialPhoneNumbers
+      const parsed = JSON.parse(stored)
+      return Array.isArray(parsed) && parsed.length > 0 ? parsed : initialPhoneNumbers
+    } catch {
+      return initialPhoneNumbers
+    }
+  })
+  const [isAnosimOpen, setIsAnosimOpen] = useState(false)
+  const [isSmspvaOpen, setIsSmspvaOpen] = useState(false)
+  const [isManualOpen, setIsManualOpen] = useState(false)
+
+  const [anosimMode, setAnosimMode] = useState('miete')
+  const [anosimService, setAnosimService] = useState('Full Germany Phone Rental')
+  const [anosimCountry, setAnosimCountry] = useState('Germany')
+  const [anosimDuration, setAnosimDuration] = useState('7 Tage - $10.85 (Empfohlen)')
+
+  const [smspvaService, setSmspvaService] = useState('1xbet - ~$1.5')
+  const [smspvaCountry, setSmspvaCountry] = useState('Germany')
+  const [smspvaDuration, setSmspvaDuration] = useState('4 Stunden')
+
+  const [manualUrl, setManualUrl] = useState('')
+
+  useEffect(() => {
+    localStorage.setItem(storageKey, JSON.stringify(phoneNumbers))
+  }, [phoneNumbers])
+
+  function addPhoneNumber(newItem) {
+    setPhoneNumbers((prev) => [newItem, ...prev])
+  }
+
+  function handleAnosimSubmit(event) {
+    event.preventDefault()
+    const expiresIn = anosimDuration.startsWith('7 Tage') ? 'in 7 days' : 'in 30 days'
+    addPhoneNumber({
+      id: `de-anosim-${Date.now()}`,
+      phone: generatePhoneNumber('de'),
+      provider: 'Anosim',
+      status: 'Aktiv',
+      service: anosimService,
+      country: anosimCountry,
+      expiresIn: anosimMode === 'aktivierung' ? 'in 1 day' : expiresIn,
+      assignedTo: 'Nicht zugewiesen',
+      badgeTone: 'orange',
+    })
+    setIsAnosimOpen(false)
+  }
+
+  function handleSmspvaSubmit(event) {
+    event.preventDefault()
+    addPhoneNumber({
+      id: `ru-smspva-${Date.now()}`,
+      phone: generatePhoneNumber('ru'),
+      provider: 'SMSPVA',
+      status: 'Aktiv',
+      service: smspvaService,
+      country: smspvaCountry,
+      expiresIn: smspvaDuration,
+      assignedTo: 'Nicht zugewiesen',
+      badgeTone: 'purple',
+    })
+    setIsSmspvaOpen(false)
+  }
+
+  function handleManualSubmit(event) {
+    event.preventDefault()
+    let hostname = 'Manual Source'
+    try {
+      hostname = new URL(manualUrl).hostname
+    } catch {
+      return
+    }
+    addPhoneNumber({
+      id: `manual-${Date.now()}`,
+      phone: generatePhoneNumber('de'),
+      provider: 'Manual',
+      status: 'Aktiv',
+      service: hostname,
+      country: 'Germany',
+      expiresIn: 'manual',
+      assignedTo: 'Nicht zugewiesen',
+      badgeTone: 'neutral',
+    })
+    setManualUrl('')
+    setIsManualOpen(false)
+  }
+
+  function handleDelete(id) {
+    setPhoneNumbers((prev) => prev.filter((item) => item.id !== id))
+  }
+
+  function handleAssignToggle(id) {
+    setPhoneNumbers((prev) => prev.map((item) => {
+      if (item.id !== id) return item
+      return { ...item, assignedTo: item.assignedTo === 'Nicht zugewiesen' ? 'admin' : 'Nicht zugewiesen' }
+    }))
+  }
+
+  function handleExtend(id) {
+    setPhoneNumbers((prev) => prev.map((item) => {
+      if (item.id !== id) return item
+      return { ...item, expiresIn: 'in 30 days' }
+    }))
+  }
+
+  return (
+    <div className="page page--phone-numbers">
+      <section className="page-header page-header--wide">
+        <div>
+          <h1>Telefonnummern</h1>
+          <p>Verwalten Sie Ihre gemieteten Telefonnummern fuer SMS-Dienste</p>
+        </div>
+        <div className="page-header__actions">
+          <button className="btn btn--ghost" type="button">Aktualisieren</button>
+          <button className="btn btn--dark" type="button" onClick={() => setIsAnosimOpen(true)}>+ de Anosim</button>
+          <button className="btn btn--dark" type="button" onClick={() => setIsSmspvaOpen(true)}>+ ru SMSPVA</button>
+          <button className="btn btn--ghost" type="button" onClick={() => setIsManualOpen(true)}>Manual URL</button>
+        </div>
+      </section>
+
+      <section className="panel panel--wide phone-panel">
+        <div className="phone-grid">
+          {phoneNumbers.map((item) => (
+            <article key={item.id} className="phone-card">
+              <header className="phone-card__header">
+                <h3>{item.phone}</h3>
+                <div className="phone-card__badges">
+                  <span className={`phone-badge phone-badge--${item.badgeTone}`}>{item.provider}</span>
+                  <span className="phone-badge phone-badge--green">{item.status}</span>
+                </div>
+              </header>
+              <p className="phone-card__service">Service {item.service}</p>
+              <div className="phone-card__meta">
+                <div>
+                  <span>Land</span>
+                  <strong>{item.country}</strong>
+                </div>
+                <div>
+                  <span>Laeuft ab</span>
+                  <strong>{item.expiresIn}</strong>
+                </div>
+                <div className="phone-card__assigned">
+                  <span>Zugewiesen an</span>
+                  <strong>{item.assignedTo}</strong>
+                </div>
+              </div>
+              <footer className="phone-card__footer">
+                <span>Nachrichten</span>
+                <div className="phone-card__actions">
+                  <button className="btn btn--ghost btn--tiny" type="button" onClick={() => handleAssignToggle(item.id)}>Zuweisen</button>
+                  <button className="btn btn--ghost btn--tiny" type="button" onClick={() => handleExtend(item.id)}>Verlaengern</button>
+                  <button className="btn btn--ghost btn--tiny" type="button" onClick={() => handleDelete(item.id)}>Loeschen</button>
+                </div>
+              </footer>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      {isAnosimOpen && (
+        <div className="modal-backdrop" onClick={() => setIsAnosimOpen(false)}>
+          <section className="modal phone-modal" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+            <header className="modal__header">
+              <h3>Anosim - Premium deutsche Nummern</h3>
+              <button className="btn btn--ghost modal__close" type="button" onClick={() => setIsAnosimOpen(false)}>×</button>
+            </header>
+            <form className="modal__body phone-modal__body" onSubmit={handleAnosimSubmit}>
+              <div className="phone-modal__label">Modus</div>
+              <div className="phone-mode-grid">
+                <button
+                  className={`phone-mode-btn ${anosimMode === 'aktivierung' ? 'phone-mode-btn--active' : ''}`}
+                  type="button"
+                  onClick={() => setAnosimMode('aktivierung')}
+                >
+                  <strong>Aktivierung</strong>
+                  <span>Eine SMS, guenstiger</span>
+                </button>
+                <button
+                  className={`phone-mode-btn ${anosimMode === 'miete' ? 'phone-mode-btn--active' : ''}`}
+                  type="button"
+                  onClick={() => setAnosimMode('miete')}
+                >
+                  <strong>Miete</strong>
+                  <span>Mehrere SMS, laengere Laufzeit</span>
+                </button>
+              </div>
+              <label className="phone-field">
+                <span>Dienst</span>
+                <select value={anosimService} onChange={(event) => setAnosimService(event.target.value)}>
+                  <option>Full Germany Phone Rental</option>
+                  <option>Tinder</option>
+                  <option>Telegram</option>
+                </select>
+              </label>
+              <label className="phone-field">
+                <span>Land</span>
+                <select value={anosimCountry} onChange={(event) => setAnosimCountry(event.target.value)}>
+                  <option>Germany</option>
+                  <option>Austria</option>
+                  <option>Switzerland</option>
+                </select>
+              </label>
+              <label className="phone-field">
+                <span>Mietdauer</span>
+                <select value={anosimDuration} onChange={(event) => setAnosimDuration(event.target.value)}>
+                  <option>7 Tage - $10.85 (Empfohlen)</option>
+                  <option>30 Tage - $28.50</option>
+                </select>
+              </label>
+              <div className="phone-benefits">
+                <h4>Premium-Miete Vorteile:</h4>
+                <ul>
+                  <li>Premium deutsche Mobilnummern</li>
+                  <li>Alle SMS-Dienste unterstuetzt</li>
+                  <li>Hohe Zustellrate</li>
+                  <li>Auto-Verlaengerungsoptionen</li>
+                  <li>24/7 Nummernverfuegbarkeit</li>
+                </ul>
+              </div>
+              <div className="modal__actions">
+                <button className="btn btn--ghost" type="button" onClick={() => setIsAnosimOpen(false)}>Abbrechen</button>
+                <button className="btn btn--dark" type="submit">Nummer mieten</button>
+              </div>
+            </form>
+          </section>
+        </div>
+      )}
+
+      {isSmspvaOpen && (
+        <div className="modal-backdrop" onClick={() => setIsSmspvaOpen(false)}>
+          <section className="modal phone-modal phone-modal--compact" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+            <header className="modal__header">
+              <h3>ru SMSPVA - Osteuropa-Spezialist</h3>
+              <button className="btn btn--ghost modal__close" type="button" onClick={() => setIsSmspvaOpen(false)}>×</button>
+            </header>
+            <form className="modal__body phone-modal__body" onSubmit={handleSmspvaSubmit}>
+              <div className="phone-provider-note">SMSPVA - Zuverlaessiger Service fuer osteuropaeische Telefonnummern</div>
+              <label className="phone-field">
+                <span>Service</span>
+                <select value={smspvaService} onChange={(event) => setSmspvaService(event.target.value)}>
+                  <option>1xbet - ~$1.5</option>
+                  <option>Telegram - ~$0.8</option>
+                  <option>Whatsapp - ~$1.1</option>
+                </select>
+              </label>
+              <label className="phone-field">
+                <span>Land</span>
+                <select value={smspvaCountry} onChange={(event) => setSmspvaCountry(event.target.value)}>
+                  <option>Germany</option>
+                  <option>Russia</option>
+                  <option>Poland</option>
+                </select>
+              </label>
+              <label className="phone-field">
+                <span>Mietdauer</span>
+                <select value={smspvaDuration} onChange={(event) => setSmspvaDuration(event.target.value)}>
+                  <option>4 Stunden</option>
+                  <option>12 Stunden</option>
+                  <option>24 Stunden</option>
+                </select>
+              </label>
+              <div className="modal__actions">
+                <button className="btn btn--danger" type="button" onClick={() => setIsSmspvaOpen(false)}>Abbrechen</button>
+                <button className="btn btn--dark" type="submit">Nummer mieten</button>
+              </div>
+            </form>
+          </section>
+        </div>
+      )}
+
+      {isManualOpen && (
+        <div className="modal-backdrop" onClick={() => setIsManualOpen(false)}>
+          <section className="modal phone-modal phone-modal--compact" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+            <header className="modal__header">
+              <h3>Add Manual Phone Number</h3>
+              <button className="btn btn--ghost modal__close" type="button" onClick={() => setIsManualOpen(false)}>×</button>
+            </header>
+            <form className="modal__body phone-modal__body" onSubmit={handleManualSubmit}>
+              <p className="phone-manual-text">
+                Add a phone number from receive-sms-online.info, sms-receive.net, or Anosim share URL.
+                This will allow you to receive SMS messages through web scraping or API.
+              </p>
+              <label className="phone-field">
+                <span>Manual SMS Provider URL</span>
+                <input
+                  type="url"
+                  placeholder="Enter URL from sms-receive.net, receive-sms-online.info, or anosim"
+                  value={manualUrl}
+                  onChange={(event) => setManualUrl(event.target.value)}
+                  required
+                />
+              </label>
+              <div className="modal__actions">
+                <button className="btn btn--danger" type="button" onClick={() => setIsManualOpen(false)}>Cancel</button>
+                <button className="btn btn--dark" type="submit" disabled={!manualUrl.trim()}>Add Phone Number</button>
+              </div>
+            </form>
+          </section>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function BankdropsPage() {
+  const storageKey = 'crm_bankdrops'
+  const [activeTab, setActiveTab] = useState('open')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [isAddOpen, setIsAddOpen] = useState(false)
+  const [bankdrops, setBankdrops] = useState(() => {
+    try {
+      const stored = localStorage.getItem(storageKey)
+      if (!stored) return []
+      const parsed = JSON.parse(stored)
+      return Array.isArray(parsed) ? parsed : []
+    } catch {
+      return []
+    }
+  })
+  const [formData, setFormData] = useState({
+    title: '',
+    employee: '',
+    code: '',
+    status: 'open',
+  })
+
+  useEffect(() => {
+    localStorage.setItem(storageKey, JSON.stringify(bankdrops))
+  }, [bankdrops])
+
+  function handleFormChange(event) {
+    const { name, value } = event.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }
+
+  function closeModal() {
+    setIsAddOpen(false)
+    setFormData({
+      title: '',
+      employee: '',
+      code: '',
+      status: 'open',
+    })
+  }
+
+  function handleSubmit(event) {
+    event.preventDefault()
+    const title = formData.title.trim()
+    const employee = formData.employee.trim()
+    const code = formData.code.trim()
+    if (!title || !employee || !code) return
+
+    const today = new Date()
+    const createdAt = `${String(today.getDate()).padStart(2, '0')}.${String(today.getMonth() + 1).padStart(2, '0')}.${today.getFullYear()}`
+
+    const nextItem = {
+      id: `bankdrop-${Date.now()}`,
+      title,
+      employee,
+      code,
+      status: formData.status,
+      createdAt,
+    }
+
+    setBankdrops((prev) => [nextItem, ...prev])
+    setActiveTab(formData.status)
+    closeModal()
+  }
+
+  function moveStatus(id, nextStatus) {
+    setBankdrops((prev) => prev.map((item) => (item.id === id ? { ...item, status: nextStatus } : item)))
+  }
+
+  const normalizedSearch = searchTerm.trim().toLowerCase()
+  const filtered = bankdrops.filter((item) => {
+    if (item.status !== activeTab) return false
+    if (!normalizedSearch) return true
+    return (
+      item.title.toLowerCase().includes(normalizedSearch)
+      || item.employee.toLowerCase().includes(normalizedSearch)
+      || item.code.toLowerCase().includes(normalizedSearch)
+    )
+  })
+
+  const emptyTitle = activeTab === 'open' ? 'Keine offenen Anfragen' : 'Keine fertigen Bankdrops'
+  const emptyText = activeTab === 'open'
+    ? 'Es gibt derzeit keine offenen Bankdrop-Anfragen zum Bearbeiten'
+    : 'Es wurden noch keine Bankdrop-Auftraege abgeschlossen oder abgelehnt'
+
+  return (
+    <div className="page page--bankdrops">
+      <section className="page-header page-header--wide">
+        <div>
+          <h1>Bankdrops</h1>
+          <p>Alle Bankdrop-Auftraege mit hochgeladenen Dokumenten</p>
+        </div>
+        <div className="page-header__actions">
+          <button className="btn btn--dark" type="button" onClick={() => setIsAddOpen(true)}>
+            Neuer Bankdrop
+          </button>
+        </div>
+      </section>
+
+      <section className="panel panel--wide bankdrops-panel">
+        <div className="bankdrops-tabs" role="tablist" aria-label="Bankdrops Filter">
+          <button
+            className={`bankdrops-tab ${activeTab === 'open' ? 'bankdrops-tab--active' : ''}`}
+            type="button"
+            onClick={() => setActiveTab('open')}
+          >
+            Offene Anfragen
+          </button>
+          <button
+            className={`bankdrops-tab ${activeTab === 'done' ? 'bankdrops-tab--active' : ''}`}
+            type="button"
+            onClick={() => setActiveTab('done')}
+          >
+            Fertige Bankdrops
+          </button>
+        </div>
+
+        <div className="search bankdrops-search">
+          <input type="text" placeholder="Nach Titel, Mitarbeiter oder Code suchen..." value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} />
+        </div>
+
+        {filtered.length === 0 ? (
+          <div className="bankdrops-empty">
+            <h3>{emptyTitle}</h3>
+            <p>{emptyText}</p>
+          </div>
+        ) : (
+          <div className="bankdrops-list">
+            {filtered.map((item) => (
+              <article key={item.id} className="bankdrop-item">
+                <div>
+                  <h4>{item.title}</h4>
+                  <p>Mitarbeiter: {item.employee}</p>
+                  <p>Code: {item.code}</p>
+                </div>
+                <div className="bankdrop-item__actions">
+                  <span>{item.createdAt}</span>
+                  {item.status === 'open' ? (
+                    <button className="btn btn--ghost btn--tiny" type="button" onClick={() => moveStatus(item.id, 'done')}>Als fertig markieren</button>
+                  ) : (
+                    <button className="btn btn--ghost btn--tiny" type="button" onClick={() => moveStatus(item.id, 'open')}>Wieder oeffnen</button>
+                  )}
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {isAddOpen && (
+        <div className="modal-backdrop" onClick={closeModal}>
+          <section className="modal bankdrops-modal" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+            <header className="modal__header">
+              <h3>Neuer Bankdrop</h3>
+              <button className="btn btn--ghost modal__close" type="button" onClick={closeModal} aria-label="Schliessen">
+                ×
+              </button>
+            </header>
+            <form className="modal__body" onSubmit={handleSubmit}>
+              <label className="field">
+                <span>Titel</span>
+                <input name="title" value={formData.title} onChange={handleFormChange} placeholder="z.B. Dokumentenpruefung DE-0123" required />
+              </label>
+              <label className="field">
+                <span>Mitarbeiter</span>
+                <input name="employee" value={formData.employee} onChange={handleFormChange} placeholder="z.B. Max Mustermann" required />
+              </label>
+              <label className="field">
+                <span>Code</span>
+                <input name="code" value={formData.code} onChange={handleFormChange} placeholder="z.B. BKD-2026-001" required />
+              </label>
+              <label className="field">
+                <span>Status</span>
+                <select name="status" value={formData.status} onChange={handleFormChange}>
+                  <option value="open">Offene Anfrage</option>
+                  <option value="done">Fertiger Bankdrop</option>
+                </select>
+              </label>
+              <div className="modal__actions">
+                <button className="btn btn--ghost" type="button" onClick={closeModal}>Abbrechen</button>
+                <button className="btn btn--dark" type="submit">Erstellen</button>
+              </div>
+            </form>
+          </section>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function CallerPage() {
+  const initialFormData = {
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '••••••••••••',
+  }
+  const [isAddOpen, setIsAddOpen] = useState(false)
+  const [formData, setFormData] = useState(initialFormData)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [callers, setCallers] = useState(() => {
+    try {
+      const stored = localStorage.getItem('crm_callers')
+      if (!stored) return []
+      const parsed = JSON.parse(stored)
+      return Array.isArray(parsed) ? parsed : []
+    } catch {
+      return []
+    }
+  })
+  const [permissions, setPermissions] = useState({
+    viewApplications: true,
+    changeStatus: true,
+    addNotes: true,
+    createEmployees: false,
+    deleteApplications: false,
+    ownStatistics: true,
+  })
+
+  const permissionItems = [
+    {
+      id: 'viewApplications',
+      label: 'Bewerbungen anzeigen',
+      description: 'Zugriff auf die Liste aller Bewerbungen',
+    },
+    {
+      id: 'changeStatus',
+      label: 'Status aendern',
+      description: 'Bewerbungen einstellen oder ablehnen',
+    },
+    {
+      id: 'addNotes',
+      label: 'Notizen hinzufuegen',
+      description: 'Notizen zu Bewerbungen hinzufuegen und bearbeiten',
+    },
+    {
+      id: 'createEmployees',
+      label: 'Mitarbeiter erstellen',
+      description: 'Bewerber direkt als Mitarbeiter anlegen',
+    },
+    {
+      id: 'deleteApplications',
+      label: 'Bewerbungen loeschen',
+      description: 'Bewerbungen aus dem System entfernen',
+    },
+    {
+      id: 'ownStatistics',
+      label: 'Eigene Statistiken',
+      description: 'Dashboard mit eigenen Leistungsdaten anzeigen',
+    },
+  ]
+
+  useEffect(() => {
+    localStorage.setItem('crm_callers', JSON.stringify(callers))
+  }, [callers])
+
+  function handleInputChange(event) {
+    const { name, value } = event.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }
+
+  function togglePermission(permissionId) {
+    setPermissions((prev) => ({ ...prev, [permissionId]: !prev[permissionId] }))
+  }
+
+  function closeModal() {
+    setIsAddOpen(false)
+    setFormData(initialFormData)
+    setPermissions({
+      viewApplications: true,
+      changeStatus: true,
+      addNotes: true,
+      createEmployees: false,
+      deleteApplications: false,
+      ownStatistics: true,
+    })
+  }
+
+  function generatePassword() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$'
+    const nextPassword = Array.from({ length: 12 }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
+    setFormData((prev) => ({ ...prev, password: nextPassword }))
+  }
+
+  function handleSubmit(event) {
+    event.preventDefault()
+    const firstName = formData.firstName.trim()
+    const lastName = formData.lastName.trim()
+    const email = formData.email.trim().toLowerCase()
+    if (!firstName || !lastName || !email) return
+
+    const today = new Date()
+    const createdAt = `${String(today.getDate()).padStart(2, '0')}.${String(today.getMonth() + 1).padStart(2, '0')}.${today.getFullYear()}`
+    const enabledPermissions = Object.values(permissions).filter(Boolean).length
+    const nextCaller = {
+      id: `${firstName.toLowerCase()}-${lastName.toLowerCase()}-${Date.now()}`,
+      name: `${firstName} ${lastName}`,
+      email,
+      createdAt,
+      enabledPermissions,
+      permissions,
+    }
+
+    setCallers((prev) => [nextCaller, ...prev])
+    closeModal()
+  }
+
+  const normalizedSearch = searchTerm.trim().toLowerCase()
+  const filteredCallers = callers.filter((caller) => (
+    caller.name.toLowerCase().includes(normalizedSearch) || caller.email.toLowerCase().includes(normalizedSearch)
+  ))
+
+  return (
+    <div className="page page--caller">
+      <section className="page-header page-header--wide">
+        <div className="caller-page-title">
+          <div>
+            <h1>Caller Verwaltung</h1>
+            <p>{callers.length} Caller insgesamt</p>
+          </div>
+        </div>
+        <div className="page-header__actions">
+          <button className="btn btn--ghost" type="button">
+            Aktualisieren
+          </button>
+          <button className="btn btn--dark" type="button" onClick={() => setIsAddOpen(true)}>
+            Caller hinzufuegen
+          </button>
+        </div>
+      </section>
+
+      <section className="panel panel--wide">
+        <div className="review-toolbar">
+          <div className="search review-toolbar__search">
+            <input
+              type="text"
+              placeholder="Caller suchen (Name, E-Mail)..."
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+            />
+          </div>
+        </div>
+      </section>
+
+      <section className="panel panel--wide review-list-panel">
+        <div className="panel__header review-list-panel__header">
+          <h3>Caller Liste</h3>
+        </div>
+        {filteredCallers.length === 0 ? (
+          <div className="review-empty">
+            <h3>{callers.length === 0 ? 'Noch keine Caller vorhanden' : 'Keine Caller gefunden'}</h3>
+            <p>
+              {callers.length === 0
+                ? 'Erstellen Sie Ihren ersten Caller, um loszulegen.'
+                : 'Passen Sie den Suchbegriff an oder erstellen Sie einen neuen Caller.'}
+            </p>
+            <button className="btn btn--dark caller-empty__action" type="button" onClick={() => setIsAddOpen(true)}>
+              Ersten Caller erstellen
+            </button>
+          </div>
+        ) : (
+          <div className="caller-table">
+            <div className="caller-table__header">
+              <span>Name</span>
+              <span>E-Mail</span>
+              <span>Berechtigungen</span>
+              <span>Erstellt</span>
+            </div>
+            {filteredCallers.map((caller) => (
+              <div key={caller.id} className="caller-table__row">
+                <span className="caller-table__title">{caller.name}</span>
+                <span>{caller.email}</span>
+                <span>{caller.enabledPermissions} aktiv</span>
+                <span>{caller.createdAt}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {isAddOpen && (
+        <div className="modal-backdrop caller-modal-backdrop" onClick={closeModal}>
+          <section
+            className="modal caller-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="caller-modal-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <header className="modal__header caller-modal__header">
+              <h3 id="caller-modal-title">
+                <span className="caller-modal__title-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M4 6c0 7 7 14 14 14l2-2-4-4-2 2c-2-1-4-3-5-5l2-2-4-4-3 1z" />
+                  </svg>
+                </span>
+                Neuen Caller hinzufuegen
+              </h3>
+              <button className="btn btn--ghost modal__close" type="button" onClick={closeModal} aria-label="Schliessen">
+                ×
+              </button>
+            </header>
+
+            <form className="modal__body caller-modal__body" onSubmit={handleSubmit}>
+              <div className="caller-modal__grid">
+                <label className="field">
+                  <span>Vorname</span>
+                  <input
+                    type="text"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleInputChange}
+                    placeholder="Max"
+                    required
+                  />
+                </label>
+                <label className="field">
+                  <span>Nachname</span>
+                  <input
+                    type="text"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleInputChange}
+                    placeholder="Mustermann"
+                    required
+                  />
+                </label>
+              </div>
+
+              <label className="field">
+                <span>E-Mail</span>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  placeholder="max.mustermann@example.com"
+                  required
+                />
+              </label>
+
+              <div className="caller-modal__password-row">
+                <label className="field">
+                  <span>Passwort</span>
+                  <input
+                    type="text"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </label>
+                <button className="btn btn--ghost caller-modal__password-btn" type="button" onClick={generatePassword}>
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M20 11a8 8 0 10-2 5.3" />
+                    <path d="M20 4v7h-7" />
+                  </svg>
+                  Neu
+                </button>
+              </div>
+
+              <div className="caller-modal__permissions">
+                <h4>
+                  <span aria-hidden="true">◔</span>
+                  Berechtigungen
+                </h4>
+                {permissionItems.map((item) => (
+                  <div key={item.id} className="caller-permission-row">
+                    <div>
+                      <p>{item.label}</p>
+                      <span>{item.description}</span>
+                    </div>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={permissions[item.id]}
+                      className={`caller-switch ${permissions[item.id] ? 'caller-switch--on' : ''}`}
+                      onClick={() => togglePermission(item.id)}
+                    >
+                      <span />
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              <div className="modal__actions caller-modal__actions">
+                <button className="btn btn--ghost" type="button" onClick={closeModal}>
+                  Abbrechen
+                </button>
+                <button className="btn btn--dark" type="submit">
+                  Caller erstellen
+                </button>
+              </div>
+            </form>
+          </section>
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -2274,15 +3119,10 @@ function SidebarIcon({ name }) {
 function App() {
   const [employees, setEmployees] = useState(initialEmployees)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const location = useLocation()
 
   function handleAddEmployee(employee) {
     setEmployees((prev) => [employee, ...prev])
   }
-
-  useEffect(() => {
-    setIsMobileMenuOpen(false)
-  }, [location.pathname])
 
   return (
     <div className={`app ${isMobileMenuOpen ? 'app--menu-open' : ''}`}>
@@ -2443,9 +3283,9 @@ function App() {
           <Route path="/auftraege/:templateId" element={<AufgabenvorlageDetailsPage />} />
           <Route path="/stellenanzeigen" element={<StellenanzeigenPage />} />
           <Route path="/stellenanzeigen/neu" element={<NeueStellenanzeigePage />} />
-          <Route path="/caller" element={<PlaceholderPage title="Caller" />} />
-          <Route path="/telefonnummern" element={<PlaceholderPage title="Telefonnummern" />} />
-          <Route path="/bankdrops" element={<PlaceholderPage title="Bankdrops" />} />
+          <Route path="/caller" element={<CallerPage />} />
+          <Route path="/telefonnummern" element={<TelefonnummernPage />} />
+          <Route path="/bankdrops" element={<BankdropsPage />} />
           <Route path="/ai-chat-agent" element={<PlaceholderPage title="AI Chat Agent" />} />
           <Route path="/chat-ueberwachung" element={<PlaceholderPage title="Chat Ueberwachung" />} />
           <Route path="/email-verlauf" element={<PlaceholderPage title="E-Mail Verlauf" />} />
