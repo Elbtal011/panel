@@ -3134,8 +3134,7 @@ function App() {
       />
       <aside className="sidebar">
         <div className="sidebar__brand">
-          <div className="brand-dot">M</div>
-          <span>MagicVics</span>
+          <span>JJPanel</span>
         </div>
         <nav
           className="sidebar__nav"

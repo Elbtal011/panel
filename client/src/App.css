@@ -11,7 +11,7 @@
 }
 
 .sidebar {
-  background: #182234;
+  background: #2a2f36;
   color: #e8eef7;
   padding: 20px 18px;
   display: flex;
@@ -25,17 +25,6 @@
   gap: 10px;
   font-weight: 700;
   font-size: 18px;
-}
-
-.brand-dot {
-  width: 36px;
-  height: 36px;
-  border-radius: 12px;
-  background: #ff4d6d;
-  display: grid;
-  place-items: center;
-  font-weight: 700;
-  color: #fff;
 }
 
 .sidebar__label {
@@ -1353,7 +1342,7 @@
 }
 
 .sidebar {
-  background: #1d2a40;
+  background: #2a2f36;
 }
 
 .content {
